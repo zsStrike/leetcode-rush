@@ -1,5 +1,2 @@
-["gta","gta(1)","gta","avalon"]
-["onepiece","onepiece(1)","onepiece(2)","onepiece(3)","onepiece"]
-["wano","wano","wano","wano"]
-["kaido","kaido(1)","kaido","kaido(1)"]
-
+[2,1,3]
+[0,0,0]

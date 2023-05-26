@@ -14,58 +14,47 @@ public class Contest {
         return Arrays.stream(data).mapToInt(a -> Integer.parseInt(a)).toArray();
     }
 }
-// 左右贪心遍历 ？
-class Solution {
-    public long minimumTotalDistance(List<Integer> robot, int[][] factory) {
-        Arrays.sort(factory, (a, b) -> a[0] - b[0]);
-        Collections.sort(robot);
-        int[][] copy = new int[factory.length][2];
-        for (int i = 0; i < factory.length; i++) {
-            copy[i] = Arrays.copyOf(factory[i], 2);
-        }
-        return Math.min(leftTravel(robot, factory), rightTravel(robot, copy));
-    }
-    public long leftTravel(List<Integer> robot, int[][] factory) {
-        long sum = 0;
-        for (int i = 0; i < robot.size(); i++) {
-            int min = Integer.MAX_VALUE;
-            int idx = -1;
-            for (int j = 0; j < factory.length; j++) {
-                if (factory[j][1] == 0) {
-                    continue;
-                }
-                int dis = Math.abs(robot.get(i) - factory[j][0]);
-                if (min > dis) {
-                    min = dis;
-                    idx = j;
-                }
-            }
-            factory[idx][1]--;
-            sum += min;
-        }
-        return sum;
-    }
-    public long rightTravel(List<Integer> robot, int[][] factory) {
-        long sum = 0;
-        for (int i = robot.size() - 1; i >= 0; i--) {
-            int min = Integer.MAX_VALUE;
-            int idx = -1;
-            for (int j = 0; j < factory.length; j++) {
-                if (factory[j][1] == 0) {
-                    continue;
-                }
-                int dis = Math.abs(robot.get(i) - factory[j][0]);
-                if (min > dis) {
-                    min = dis;
-                    idx = j;
-                }
-            }
-            factory[idx][1]--;
-            sum += min;
-        }
-        return sum;
-    }    
-}
 
+/**
+ * InnerContest
+ */
+class Solution {
+    // n * sum1 = n1 * sum
+    public boolean splitArraySameAverage(int[] nums) {
+        if (nums.length == 1) return false;
+        int n = nums.length, m = n / 2;
+        int sum = Arrays.stream(nums).sum();
+        for (int i = 0; i < n; i++) {
+            nums[i] = nums[i] * n - sum;
+        }
+        HashSet<Integer> set = new HashSet<>();
+        for (int i = 1; i < (1 << m); i++) {
+            int total = 0;
+            for (int j = 0; j < m; j++) {
+                if ((i & (1 << j)) != 0) {
+                    total += nums[j];
+                }
+            }
+            if (total == 0) return true;
+            set.add(total);
+        }
+        int rsum = 0;
+        for (int i = m; i < n; i++) {
+            rsum += nums[i];
+        }
+        for (int i = 1; i < (1 << (n - m)); i++) {
+            int tot = 0;
+            for (int j = m; j < n; j++) {
+                if ((i & (1 << (j - m))) != 0) {
+                    tot += nums[j];
+                }
+            }
+            if (tot == 0 || (rsum != tot && set.contains(-tot))) {
+                return true;
+            }
+        }    
+        return false;    
+    }
+}
 
 

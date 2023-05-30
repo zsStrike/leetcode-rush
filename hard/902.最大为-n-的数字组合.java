@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Collector;
 
 /*
  * @lc app=leetcode.cn id=902 lang=java
@@ -9,40 +10,32 @@ import java.util.HashMap;
 
 // @lc code=start
 class Solution {
-    HashMap<Integer, Integer> map = new HashMap<>();
+    HashMap<String, Integer> map = new HashMap<>();
     public int atMostNGivenDigitSet(String[] digits, int n) {
-        String[] num = String.valueOf(n).split("");
-        int count = 0;
-        int tmp = digits.length;
-        for (int i = 1; i < num.length; i++) {
-            count += tmp;
-            tmp *= digits.length;
-        }
-        return atMostNGivenDigitSet(digits, num, 0) + count;
+        map = new HashMap<>();
+        char[] cs = String.valueOf(n).toCharArray();
+        char[] ds = String.join("", digits).toCharArray();
+        return atMostNGivenDigitSet(cs, 0, true, ds, false);
     }
-    int atMostNGivenDigitSet(String[] digits, String[] num, int idx) {
-        if (map.containsKey(idx)) {
-            return map.get(idx);
+    int atMostNGivenDigitSet(char[] cs, int idx, boolean isLimit, char[] digits, boolean isNum) {
+        String key = Arrays.toString(cs) + " " + idx + " " + isLimit + " " + isNum;
+        if (map.containsKey(key)) return map.get(key);
+        int len = cs.length;
+        if (len == idx) return isNum ? 1 : 0;
+        char cur = cs[idx];
+        char min = '0';
+        char max = isLimit ? cur : '9';
+        int ans = 0;
+        if (isNum == false) {
+            ans += atMostNGivenDigitSet(cs, idx + 1, false, digits, isNum);
         }
-        int numLen = num.length;
-        int count = 0;
-        if (idx == numLen - 1) {
-            for (String d : digits) {
-                if (d.compareTo(num[idx]) <= 0) {
-                    count++;
-                }
-            }
-        } else {
-            for (String d : digits) {
-                if (d.compareTo(num[idx]) < 0) {
-                    count += Math.pow(digits.length, numLen - idx - 1);
-                } else if (d.compareTo(num[idx]) == 0) {
-                    count += atMostNGivenDigitSet(digits, num, idx + 1);
-                }
+        for (char d : digits) {
+            if (min <= d && max >= d) {
+                ans += atMostNGivenDigitSet(cs, idx + 1, isLimit && d == max, digits, true);
             }
         }
-        map.put(idx, count);
-        return count;
+        map.put(key, ans);
+        return ans;
     }
 }
 // @lc code=end

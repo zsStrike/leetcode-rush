@@ -15,46 +15,92 @@ public class Contest {
     }
 }
 
-/**
- * InnerContest
- */
+
+
 class Solution {
-    // n * sum1 = n1 * sum
-    public boolean splitArraySameAverage(int[] nums) {
-        if (nums.length == 1) return false;
-        int n = nums.length, m = n / 2;
-        int sum = Arrays.stream(nums).sum();
+    // 唯一路径，找到路径中涉及到的点
+    // 在所有点中，求解问题
+    HashMap<String, Integer> memo;
+    public int minimumTotalPrice(int n, int[][] edges, int[] price, int[][] trips) {
+
+        ArrayList<Integer>[] adj = new ArrayList[n];
         for (int i = 0; i < n; i++) {
-            nums[i] = nums[i] * n - sum;
+            adj[i] = new ArrayList<>();
         }
-        HashSet<Integer> set = new HashSet<>();
-        for (int i = 1; i < (1 << m); i++) {
+        for (int[] edge : edges) {
+            int a = edge[0], b = edge[1];
+            adj[a].add(b);
+            adj[b].add(a);
+        }    
+        HashMap<Integer, Integer> count = new HashMap<>();
+        for (int[] trip : trips) {
+            HashSet<Integer> path = new HashSet<>();
+            path.add(trip[0]);
+            findPath(trip[0], trip[1], adj, path);
+            for (int key : path) {
+                count.put(key, count.getOrDefault(key, 0) + 1);
+            }
+        }
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int key : count.keySet()) {
+            list.add(key);
+        }
+        memo = new HashMap<>();
+        return dfs(0, list, count, price, adj, new HashSet<>());
+
+    }
+
+    // 表示从 idx 到结束最小的结果
+    int dfs(int idx, ArrayList<Integer> list, HashMap<Integer, Integer> count, int[] price, ArrayList<Integer>[] adj, HashSet<Integer> half) {
+        if (idx == list.size()) {
             int total = 0;
-            for (int j = 0; j < m; j++) {
-                if ((i & (1 << j)) != 0) {
-                    total += nums[j];
-                }
+            for (int key : count.keySet()) {
+                total += price[key] * count.get(key);
             }
-            if (total == 0) return true;
-            set.add(total);
+            return total;
         }
-        int rsum = 0;
-        for (int i = m; i < n; i++) {
-            rsum += nums[i];
-        }
-        for (int i = 1; i < (1 << (n - m)); i++) {
-            int tot = 0;
-            for (int j = m; j < n; j++) {
-                if ((i & (1 << (j - m))) != 0) {
-                    tot += nums[j];
-                }
+        int cur = list.get(idx);
+        boolean canHalf = true;
+        for (int neibor : adj[cur]) {
+            if (half.contains(neibor)) {
+                canHalf = false;
+                break;
             }
-            if (tot == 0 || (rsum != tot && set.contains(-tot))) {
+        }
+        String memoKey = idx + " " + half.toString();
+        if (memo.containsKey(memoKey)) return memo.get(memoKey); 
+        int ans = Integer.MAX_VALUE;       
+        if (canHalf) {
+            half.add(cur);
+            price[cur] /= 2;
+            ans = Math.min(dfs(idx + 1, list, count, price, adj, half), ans);
+            price[cur] *= 2;
+            half.remove(cur);
+        }
+        ans = Math.min(dfs(idx + 1, list, count, price, adj, half), ans);
+        memo.put(memoKey, ans);
+        return ans;       
+    }
+    
+
+    boolean findPath(int cur, int target, ArrayList<Integer>[] adj, HashSet<Integer> visited) {
+        if (cur == target) {
+            return true;
+        }
+        for (int next : adj[cur]) {
+            if (visited.contains(next)) {
+                continue;
+            }
+            visited.add(next);
+            if (findPath(next, target, adj, visited)) {
                 return true;
             }
-        }    
-        return false;    
+            visited.remove(next);
+        }
+        return false;
     }
+    
 }
+
 
 

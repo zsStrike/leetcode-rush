@@ -1,22 +1,9 @@
 package newcoder;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
-import java.math.BigInteger;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
-import java.util.Scanner;
-import java.util.StringJoiner;
-import java.util.TreeSet;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.*;
+import java.io.*;
+import java.nio.*;
 
 // 注意类名必须为 Main, 不要有任何 package xxx 信息
 public class Main {

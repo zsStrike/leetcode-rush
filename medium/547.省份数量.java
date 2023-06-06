@@ -15,45 +15,43 @@ class Solution {
     // 1 0 1 1
     public int findCircleNum(int[][] isConnected) {
         int n = isConnected.length;
-        int[] parent = new int[n]; // bigger -> small
-        for (int i = 0; i < n; i++) {
-            parent[i] = i;
-        }
+        UnionFind uf = new UnionFind(n);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (isConnected[i][j] == 1) {
-                    int cur = j;
-                    int par = parent[j];
-                    while (cur != par) {
-                        cur = par;
-                        par = parent[par];
-                    }
-                    // parent[cur] = i;
-                    int a = i;
-                    int p = parent[a];
-                    while (a != p) {
-                        a = p;
-                        p = parent[p];
-                    }
-                    if (par < p) {
-                        parent[p] = par;
-                    } else {
-                        parent[par] = p;
-                    }
+                    uf.union(i, j);
                 }
             }
         }
         HashSet<Integer> set = new HashSet<>();
         for (int i = 0; i < n; i++) {
-            int cur = i;
-            int par = parent[i];
-            while (par != cur) {
-                cur = par;
-                par = parent[par];
-            }
-            set.add(par);
+            set.add(uf.getParent(i));
         }
         return set.size();
+    }
+}
+class UnionFind {
+    int[] parents;
+    UnionFind(int n) {
+        parents = new int[n];
+        for (int i = 0; i < n; i++) {
+            parents[i] = i;
+        }
+    }
+    int getParent(int i) {
+        int cur = i;
+        int par = parents[i];
+        while (cur != par) {
+            cur = par;
+            par = parents[par];
+        } 
+        parents[i] = par;
+        return par;
+    }
+    void union(int i, int j) {
+        int pi = getParent(i);
+        int pj = getParent(j);
+        parents[pi] = pj;
     }
 }
 // @lc code=end

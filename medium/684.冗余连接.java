@@ -13,57 +13,42 @@ import java.util.List;
 class Solution {
     public int[] findRedundantConnection(int[][] edges) {
         int n = edges.length;
-        LinkedList<Integer>[] adj = new LinkedList[n + 1];
-        for (int i = 1; i <= n; i++) {
-            adj[i] = new LinkedList<>();
-        }
+        UnionFind uf = new UnionFind(n + 1);
         for (int[] edge : edges) {
-            adj[edge[0]].add(edge[1]);
-            adj[edge[1]].add(edge[0]);
-        }
-        HashSet<Integer> visited = new HashSet<>();
-        LinkedList<Integer> ans = new LinkedList<>();
-        ans.add(1);
-        visited.add(1);
-        dfs(1, visited, ans, adj);
-        int idx = ans.indexOf(ans.getLast());
-        HashSet<String> set = new HashSet<>();
-        System.out.println(ans + " idx: " + idx);
-        for (int i = idx; i < ans.size() - 1; i++) {
-            set.add(ans.get(i) + " " + ans.get(i + 1));
-            set.add(ans.get(i + 1) + " " + ans.get(i));
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            if (set.contains(edges[i][0] + " " + edges[i][1])) {
-                return edges[i];
+            int pa = uf.getParent(edge[0]);
+            int pb = uf.getParent(edge[1]);
+            if (pa == pb) {
+                return edge;
             }
+            uf.union(pa, pb);
         }
-        return new int[] {-1, -1};
+        return null;
     }
-    boolean dfs(int cur, HashSet<Integer> visited, LinkedList<Integer> list, LinkedList<Integer>[] adj) {
-        for (int ad : adj[cur]) {
-            int n = list.size();
-            System.out.println(list + " " + ad);
-            if (n >= 2 && list.get(n - 2) == ad) {
-                continue;
-            }
-            if (visited.contains(ad)) {
-                list.add(ad);
-                return true;
-            }
-            visited.add(ad);
-            list.add(ad);
-            int index = list.size() - 1;
-            System.out.println(list);
-            if (dfs(ad, visited, list, adj)) {
-                return true;
-            }
-            list.remove(index);
-            visited.remove(ad);            
+}
+
+class UnionFind {
+    int[] parents;
+    UnionFind(int n) {
+        parents = new int[n];
+        for (int i = 0; i < n; i++) {
+            parents[i] = i;
         }
-        return false;
     }
-    
+    int getParent(int i) {
+        int cur = i;
+        int par = parents[i];
+        while (cur != par) {
+            cur = par;
+            par = parents[par];
+        } 
+        parents[i] = par;
+        return par;
+    }
+    void union(int i, int j) {
+        int pi = getParent(i);
+        int pj = getParent(j);
+        parents[pi] = pj;
+    }
 }
 // @lc code=end
 

@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /*
@@ -9,30 +10,18 @@ import java.util.HashSet;
 
 // @lc code=start
 class Solution {
+    HashMap<String, Boolean> map = new HashMap<>();
     public boolean wordBreak(String s, List<String> wordDict) {
-        int n = s.length();
-        boolean[] dp = new boolean[n]; // dp[i] s[..i]
-        HashSet<String> set = new HashSet<>(wordDict);
-        // init
-        for (int i = 1; i <= n; i++) {
-            if (set.contains(s.substring(0, i))) {
-                dp[i - 1] = true;
+        if (map.containsKey(s)) return map.get(s);
+        if (s == "") return true;
+        for (String word : wordDict) {
+            if (s.startsWith(word) && wordBreak(s.substring(word.length()), wordDict)) {
+                map.put(s, true);
+                return true;
             }
         }
-        // dp
-        for (int i = 1; i < n; i++) {
-            // System.out.println(Arrays.toString(dp));
-            if (dp[i]) {
-                continue;
-            }
-            for (int j = i; j > 0; j--) {
-                if (set.contains(s.substring(j, i + 1)) && dp[j - 1]) {
-                    dp[i] = true;
-                    break;
-                }
-            } 
-        }
-        return dp[n - 1];
+        map.put(s, false);
+        return false;
     }
 }
 // @lc code=end

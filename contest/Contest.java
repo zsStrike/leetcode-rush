@@ -18,88 +18,31 @@ public class Contest {
 
 
 class Solution {
-    // 唯一路径，找到路径中涉及到的点
-    // 在所有点中，求解问题
-    HashMap<String, Integer> memo;
-    public int minimumTotalPrice(int n, int[][] edges, int[] price, int[][] trips) {
-
-        ArrayList<Integer>[] adj = new ArrayList[n];
-        for (int i = 0; i < n; i++) {
-            adj[i] = new ArrayList<>();
-        }
-        for (int[] edge : edges) {
-            int a = edge[0], b = edge[1];
-            adj[a].add(b);
-            adj[b].add(a);
-        }    
-        HashMap<Integer, Integer> count = new HashMap<>();
-        for (int[] trip : trips) {
-            HashSet<Integer> path = new HashSet<>();
-            path.add(trip[0]);
-            findPath(trip[0], trip[1], adj, path);
-            for (int key : path) {
-                count.put(key, count.getOrDefault(key, 0) + 1);
+    public int minOperations(int[] nums) {
+        int n = nums.length;
+        if (arrGcd(nums, 0, n - 1) != 1) return -1;
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int start = i, end = i + len - 1;
+                if (arrGcd(nums, start, end) == 1) {
+                    return len + n - 1;
+                }
             }
         }
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int key : count.keySet()) {
-            list.add(key);
-        }
-        memo = new HashMap<>();
-        return dfs(0, list, count, price, adj, new HashSet<>());
-
+        return -1;
     }
-
-    // 表示从 idx 到结束最小的结果
-    int dfs(int idx, ArrayList<Integer> list, HashMap<Integer, Integer> count, int[] price, ArrayList<Integer>[] adj, HashSet<Integer> half) {
-        if (idx == list.size()) {
-            int total = 0;
-            for (int key : count.keySet()) {
-                total += price[key] * count.get(key);
-            }
-            return total;
+    int arrGcd(int[] nums, int start, int end) {
+        int res = nums[start];
+        for (int i = start; i <= end; i++) {
+            res = gcd(res, nums[i]);
         }
-        int cur = list.get(idx);
-        boolean canHalf = true;
-        for (int neibor : adj[cur]) {
-            if (half.contains(neibor)) {
-                canHalf = false;
-                break;
-            }
-        }
-        String memoKey = idx + " " + half.toString();
-        if (memo.containsKey(memoKey)) return memo.get(memoKey); 
-        int ans = Integer.MAX_VALUE;       
-        if (canHalf) {
-            half.add(cur);
-            price[cur] /= 2;
-            ans = Math.min(dfs(idx + 1, list, count, price, adj, half), ans);
-            price[cur] *= 2;
-            half.remove(cur);
-        }
-        ans = Math.min(dfs(idx + 1, list, count, price, adj, half), ans);
-        memo.put(memoKey, ans);
-        return ans;       
+        return res;
     }
-    
-
-    boolean findPath(int cur, int target, ArrayList<Integer>[] adj, HashSet<Integer> visited) {
-        if (cur == target) {
-            return true;
-        }
-        for (int next : adj[cur]) {
-            if (visited.contains(next)) {
-                continue;
-            }
-            visited.add(next);
-            if (findPath(next, target, adj, visited)) {
-                return true;
-            }
-            visited.remove(next);
-        }
-        return false;
+    int gcd(int a, int b) {
+        if (a < b) return gcd(b, a);
+        if (a % b == 0) return b;
+        return gcd(b, a % b);
     }
-    
 }
 
 

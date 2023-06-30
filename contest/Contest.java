@@ -4,7 +4,7 @@ import java.util.*;
 public class Contest {
     public static void main(String[] args) {
         Solution sol = new Solution();
-        sol.count("12", "1", 1, 8);
+        // sol.count("12", "1", 1, 8);
         // System.out.println(Arrays.toString("/a/b".substring(1).split("/")));
         // System.out.println(sol.makeIntegerBeautiful(4545454545L, 15)); 
     }
@@ -19,54 +19,61 @@ public class Contest {
 
 
 class Solution {
-    public static final int MOD = (int) (1e9 + 7);
-    HashMap<String, Long> memo = new HashMap<>();
-    public int count(String num1, String num2, int min_sum, int max_sum) {
-        long a = count(num2.toCharArray(), 0, true, 0, min_sum, max_sum);
-        // System.out.println(a);
-        memo.clear();
-        long b = count(num1.toCharArray(), 0, true, 0, min_sum, max_sum);
-        System.out.println(b);
-        int tmp = (int) ((a + MOD - b ) % MOD);
-        int s = 0;
-        for (char c : num1.toCharArray()) {
-            s += c - '0';
+    class Node {
+        int x;
+        int y;
+        int next = -1;
+        int res = 0;
+        Node (int x, int y) {
+            this.x = x;
+            this.y = y;
         }
-        if (s >= min_sum && s <= max_sum) {
-            return tmp + 1;
-        }
-        return tmp;
-        // String.format("%25s", num1).replaceAll(" ", "0")
     }
-    // 1-num1 满足条件的数字  n*MOD + a
-    // 1-num2               m*MOD + b
-    // (n - m)*MOD + (a - b)  % MOD  =>  n == m, a - b  n > m  a + MOD - b % MOD
-    private long count(char[] cs, int index, boolean isLimit, int digitCount, int minSum, int maxSum) {
-        String key = digitCount + " " + index + " " + isLimit;
-        if (memo.containsKey(key)) return memo.get(key);
-        int n = cs.length;
-        if (index >= n) {
-            if (digitCount >= minSum && digitCount <= maxSum) {
-                return 1;
+    public int[] maximumSumQueries(int[] nums1, int[] nums2, int[][] queries) {
+        int n = nums1.length;
+        Node[] nodes = new Node[n];
+        for (int i = 0; i < n; i++) {
+            nodes[i] = new Node(nums1[i], nums2[i]);
+        }
+        Arrays.sort(nodes, (a, b) -> a.x == b.x ? b.y - a.y : a.x - b.x);
+        nodes[n - 1].next = n;
+        for (int i = n - 2; i >= 0; i--) {
+            if (nodes[i].x == nodes[i + 1].x) {
+                nodes[i].next = nodes[i + 1].next;
             } else {
-                return 0;
+                nodes[i].next = i + 1;
             }
         }
-        char min = '0';
-        char max = isLimit ? cs[index] : '9';
-        long sum = 0;
-        for (char c = min; c <= max; c++) {
-            if (digitCount + c - '0' > maxSum) {
-                continue;
+        LinkedList<Integer> list = new LinkedList<>();
+        for (int[] query : queries) {
+            int x = query[0], y = query[1];
+            int start = bs(nodes, x);
+            int max = 0;
+            while (start < n) {
+                if (nodes[start].y > y) {
+                    max = Math.max(max, nodes[start].x + nodes[start].y);
+                    start++;
+                } else {
+                    start = nodes[start].next;
+                }
             }
-            sum += count(cs, index + 1, isLimit && c == max, digitCount + c - '0', minSum, maxSum);
-            System.out.println(c + " " + index + " " + sum);
-            sum %= MOD;
+            list.add(max);
         }
-        if (index > 0) {
-            memo.put(key, sum);
+        return list.stream().mapToInt(a -> a).toArray();
+    }
+    int bs(Node[] nodes, int x) {
+        int left = 0, right = nodes.length - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (nodes[mid].x == x) {
+                left = mid + 1;
+            } else if (nodes[mid].x < x) {
+                left = mid + 1;
+            } else if (nodes[mid].x > x) {
+                right = mid;
+            }
         }
-        return sum;
+        return right;
     }
 }
 
